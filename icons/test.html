@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<head>
+	<title></title>
+	<META name="author" content="William Stam">
+	<META name="date" content="2013/10/21 11:28 AM">
+	<link rel="stylesheet" href="../assets/css/site.css">
+	<link rel="stylesheet" href="../assets/font-awesome/css/font-awesome.css">
+	<!--[if IE 7]>
+	<link rel="stylesheet" href="../assets/font-awesome/css/font-awesome-ie7.css">
+	<![endif]-->
+
+
+</head>
+<body>
+
+<div id="latest-area"></div>
+<div id="category-area"></div>
+
+
+<div id="details-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+</div>
+
+<script src="../assets/js/jquery-1.7.1.min.js"></script>
+<script src="../assets/js/jquery.jqote2.js"></script>
+<script src="../assets/js/bootstrap-2.3.1.min.js"></script>
+<script src="../assets/js/jquery.ba-bbq.js"></script>
+<script type="text/javascript">
+
+
+	var data = [
+		{
+			'version': '3.2',
+			'icons'  : [
+				{
+					'Web Application Icons': [
+						{'icon': 'icon-compass', 'name': "Compass", 'tags': ['compass', 'icon']},
+						{'icon': 'icon-picture', 'name': "Picture", 'tags': ['picture', 'image', 'photo', 'icon']},
+
+					],
+					'Text Editor Icons'    : [
+						{'icon': 'icon-bold', 'name': "Bold", 'tags': ['bold', 'icon']},
+
+					]
+				}
+			]
+		},
+		{
+			'version': '3.1',
+			'icons'  : [
+				{
+					'Web Application Icons': [
+						{'icon': 'icon-android', 'name': "Android", 'tags': ['android', 'icon']},
+						{'icon': 'icon-sun', 'name': "Sun", 'tags': ['sun', 'icon']},
+						{'icon': 'icon-bell', 'name': "Bell", 'tags': ['bell', 'icon']},
+
+					],
+					'Currency'             : [
+						{'icon': 'icon-usd', 'name': "USD", 'tags': ['usd', 'currency', 'icon']},
+
+					]
+				}
+			]
+		}
+	];
+
+
+
+
+	var list = {};
+	var list_icons_only = [];
+	$.each(data, function (k, v) {
+		//console.info(v); 
+		$.map(v['icons'], function (cats) {
+			//console.log(cats); 
+			$.map(cats, function (item, key) {
+				if (!list[key]) {
+					list[key] = {
+						"category": key,
+						"icons"   : []
+					};
+				}
+				$.each(item, function (k, icon) {
+
+					list[key]['icons'].push(icon);
+					list_icons_only.push(icon);
+				});
+
+			});
+
+		})
+
+
+	});
+
+	list = $.map(list, function (item) {
+		return item;
+	});
+
+
+
+
+	var latest = data[0];
+	var latest_icons = [];
+	$.map(latest['icons'], function (cats) {
+		$.map(cats, function (item, key) {
+
+			$.each(item, function (k, icon) {
+				latest_icons.push(icon)
+			});
+
+		});
+
+	});
+	latest['icons'] = latest_icons;
+
+
+
+
+
+
+	$(document).ready(function () {
+		$(document).on('hide', '#details-modal', function () {
+			$.bbq.removeState("icon")
+		});
+
+		$(document).on('click', '.the-icons a', function (e) {
+			e.preventDefault();
+			var $this = $(this);
+			var href = $this.attr("href");
+			href = href.replace("#icon=","");
+			$.bbq.pushState({'icon':href});
+			getDetails();
+			
+			
+		});
+		$("#latest-area").jqotesub($("#template-latest"), latest);
+		$("#category-area").jqotesub($("#template-list"), list);
+
+		getDetails();
+		//window.onhashchange = getDetails;
+		
+	});
+
+	function getDetails(){
+		var view = $.bbq.getState("icon");
+		if (view){
+			var details = list_icons_only.filter(function (item) {
+				return item.icon == view
+			});
+		
+			if (details.length){
+				//console.log(details);
+				$("#details-modal").jqotesub($("#template-details"), details).modal("show")
+			}
+		}
+	}
+
+
+
+
+</script>
+
+
+
+
+<script type="text/x-jqote-template" id="template-latest">
+	<![CDATA[
+	<h1>New icons in <%= this.version %></h1>
+
+	<div class="row the-icons">
+		<% for (var i in this.icons) { %>
+		<div class="span3" style="display: block;" title="<%= this.icons[i].name %>">
+			<a href="#icon=<%= this.icons[i].icon %>"><i class="<%= this.icons[i].icon %>"></i><%= this.icons[i].icon %>
+			</a></div>
+		<% } %>
+	</div>
+
+
+	]]>
+</script>
+
+<script type="text/x-jqote-template" id="template-list">
+	<![CDATA[
+	<h1><%= this.category %></h1>
+
+	<div class="row the-icons">
+		<% for (var i in this.icons) { %>
+		<div class="span3" style="display: block;" title="<%= this.icons[i].name %>">
+			<a href="#icon=<%= this.icons[i].icon %>"><i class="<%= this.icons[i].icon %>"></i><%= this.icons[i].icon %>
+			</a></div>
+		<% } %>
+	</div>
+
+
+	]]>
+</script>
+<script type="text/x-jqote-template" id="template-details">
+	<![CDATA[
+
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3><h1><%= this.name %></h1></h3>
+	</div>
+	<div class="modal-body">
+		<div class="jumbotron jumbotron-icon">
+			<div class="info-icons">
+				<i class="<%= this.icon %> icon-6"></i>&nbsp;&nbsp;
+            <span class="hidden-phone">
+		        <i class="<%= this.icon %> icon-5"></i>&nbsp;&nbsp;
+		        <span class="hidden-tablet">
+			        <i class="<%= this.icon %> icon-4"></i>&nbsp;&nbsp;
+		        </span>
+		        <i class="<%= this.icon %> icon-3"></i>&nbsp;&nbsp;
+		        <i class="<%= this.icon %> icon-2"></i>&nbsp;
+		    </span>
+				<i class="<%= this.icon %> icon-1"></i>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<a href="#" class="btn">Close</a>
+	</div>
+
+
+
+
+
+	]]>
+</script>
+
+</body>
+</html>
